@@ -8,13 +8,20 @@ You can install required modules using this command:
 
 ## Usage
 First you need to authenticate on vk.com using your login and password:
-`./vkaudio.py auth <login> <password>`
+```
+./vkaudio.py auth <login> <password>
+```
 VKaudio will receive token and store it in *token.txt* file.
 You can switch to another account by running previous command with another credentials
 
 Now you can use this tool simply by running it with no arguments:
-`./vkaudio.py`
+```
+./vkaudio.py
+```
 Type number of song to download it or type `a` to download everything. (playlists support will be added in future)
 
 You can also save full list of your songs in file using this command:
-`./vkaudio.py dump <filename>`
+```
+./vkaudio.py dump <filename>
+```
+
