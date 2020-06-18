@@ -62,14 +62,14 @@ class VkAPI:
             else:
                 raise VkAuthError(resp["error"])
 
-    def request(self, method, parameters=None):
+    def request(self, method, parameters=None) -> dict:
         if parameters is None:
             parameters = dict()
         parameters['access_token'] = self.token
         parameters['v'] = self.version
         parameters['device_id'] = self.device_id
         parameters['lang'] = 'en'
-        resp = requests.post(API_BASE + method, data=parameters, headers=HEADERS).json()
+        resp = requests.post(API_BASE + method, data=parameters, headers=self.headers).json()
         if 'error' in resp:
             error = resp['error']
             error_code = error['error_code']
@@ -78,7 +78,7 @@ class VkAPI:
                 c_sid = error['captcha_sid']
                 c_img = error['captcha_img']
                 with open('captcha.jpg', 'wb') as f:
-                    f.write(requests.get(c_img, headers=HEADERS).content)
+                    f.write(requests.get(c_img, headers=self.headers).content)
                 c_key = input('Enter text from captcha.jpg')
                 parameters['captcha_sid'] = c_sid
                 parameters['captcha_key'] = c_key
@@ -86,3 +86,22 @@ class VkAPI:
             raise VkAPIError("Error code %d: %s" % (error_code, error_msg))
         else:
             return resp['response']
+
+    def upload(self, url, file):
+        chars = "0123456789abcdef"
+        boundary = "VK-FILE-UPLOAD-BOUNDARY-%s-%s-%s-%s-%s" % (
+            "".join(random.choices(chars, k=8)), "".join(random.choices(chars, k=4)),
+            "".join(random.choices(chars, k=4)), "".join(random.choices(chars, k=4)),
+            "".join(random.choices(chars, k=12)))
+        headers = {"user-agent": self.user_agent, "content-type": "multipart/form-data; boundary=" + boundary}
+        filename = "".join(random.choices(chars, k=10)) + ".jpg"
+        data_header = '\r\n--%s\r\nContent-Disposition: form-data; name="photo"; filename="%s"' \
+                      '\r\nContent-Type: image/jpeg\r\n\r\n' % (boundary, filename)
+        data_end = "\r\n--%s--\r\n" % boundary
+        data = data_header.encode("ascii") + file + data_end.encode("ascii")
+        resp = requests.post(url, headers=headers, data=data).json()
+        server, photo, vk_hash = resp.get("server"), resp.get("photo"), resp.get("hash")
+        if server and photo and vk_hash:
+            return server, photo, vk_hash
+        else:
+            raise VkAPIError("Failed to upload")
