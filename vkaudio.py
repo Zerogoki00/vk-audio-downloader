@@ -55,7 +55,7 @@ for s in sections:
         break
 print('Default section: "%s": %s: %s' % (music_section["title"], music_section["id"], music_section["url"]))
 next_start = music_section.get("next_from")
-while next_start:
+while :
     # print("Next from:", next_start)
     resp = vk.request("catalog.getSection", {"start_from": next_start, "section_id": music_section["id"]})
     next_start = resp["section"].get("next_from")
@@ -77,16 +77,35 @@ if dump:
     sys.exit()
 while True:
     download_all = False
+    download_range = False
     task = []
-    user_input = input("Select track (a = all / q to exit): ")
+    user_input = input("Select track (e.g. 1 or 1,2,3 or 1-5,7,9 / a = all / q to exit): ")
     if user_input == "q":
         break
     if user_input == "a":
         task = audios
         download_all = True
     elif not user_input.isnumeric():
-        print("Enter number")
-        continue
+        parse_in = user_input.split(",")
+        parse_good = True
+        for el in parse_in:
+            if "-" in el:
+                rng = el.split("-")
+                if len(rng) != 2 or not (rng[0].isnumeric() and rng[1].isnumeric()):
+                    print("Incorrect range input format")
+                    parse_good = False
+                    break
+                for i in range(int(rng[0]), int(rng[1])+1):
+                    task.append(audios[i])
+            elif el.isnumeric():
+                task.append(audios[int(el)])
+            else:
+                parse_good = False
+        if not parse_good:
+            print("Enter number, list of numbers or ranges")
+            continue
+        else:
+            download_range = True
     else:
         selected_id = int(user_input) - 1
         if selected_id + 1 > len(audios):
@@ -97,7 +116,7 @@ while True:
         artist = audio["artist"]
         title = audio["title"]
         track_name = "%s — %s" % (artist, title)
-        if download_all:
+        if download_all or download_range:
             result_number = n + 1
         else:
             result_number = int(user_input)
