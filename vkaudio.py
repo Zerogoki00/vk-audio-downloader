@@ -55,7 +55,7 @@ for s in sections:
         break
 print('Default section: "%s": %s: %s' % (music_section["title"], music_section["id"], music_section["url"]))
 next_start = music_section.get("next_from")
-while :
+while next_start:
     # print("Next from:", next_start)
     resp = vk.request("catalog.getSection", {"start_from": next_start, "section_id": music_section["id"]})
     next_start = resp["section"].get("next_from")
