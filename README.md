@@ -2,7 +2,7 @@
 Download music from vk.com
 
 ## Requirements
-Python 3 is required to run this program and *ffmpeg* binary should be in PATH.
+Python 3.6 is required to run this program and *ffmpeg* binary should be in PATH.
 You can install required modules using this command:
 `pip install -r requirements.txt`
 
