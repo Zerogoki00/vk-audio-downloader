@@ -159,7 +159,7 @@ while True:
                     print("Processed block %d/%d" % (i + 1, len(blocks)), end="\r")
                     with open(out_file_ts, "ab") as f:
                         f.write(downloaded_block)
-                os.system('ffmpeg -y -hide_banner -loglevel panic -i "%s" -c copy "%s"' % (out_file_ts, out_file_mp3))
+                os.system('ffmpeg -y -hide_banner -loglevel panic -i "%s" -metadata title="%s" -metadata artist="%s" -c copy "%s"' % (out_file_ts, title, artist, out_file_mp3))
                 print("\nConverted to mp3")
                 os.remove(out_file_ts)
         else:
